@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'sidekiq', '>= 2.6'
   spec.add_runtime_dependency 'opentsdb'
 
-  spec.add_development_dependency 'bundler', '~> 1.12'
+  spec.add_development_dependency 'bundler', '~> 1.11'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'pry'
 end
