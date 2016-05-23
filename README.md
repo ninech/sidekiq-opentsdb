@@ -21,9 +21,17 @@ You need to add the middleware to your call stack. To do so, put the folllowing 
 ```ruby
 Sidekiq.configure_server do |config|
   config.server_middleware do |chain|
-    chain.add Sidekiq::Opentsdb::ServerMiddleware, metric_prefix: 'nine', opentsdb_hostname: 'localhost', opentsdb_port: '4242'
+    chain.add Sidekiq::Opentsdb::ServerMiddleware, opentsdb_hostname: 'localhost', opentsdb_port: '4242',
+                                                   metric_prefix: 'nine', only: %w(retry_size dead_size)
   end
 end
 ```
 
-Change the values to point to your OpenTSDB instance.
+### Options
+
+opentsdb_hostname: (required) Hostname of your opentsdb server.
+opentsdb_port:     (required) Port of your opentsdb server.
+
+metric_prefix: (optional) Prefix of the metric keys (default: '').
+only: [Array] (optional) Only send the given metrics to OpenTSDB.
+except: [Array] (optional) Send all but the given metrics to OpenTSDB.
