@@ -14,22 +14,24 @@ module Sidekiq
         yield
 
         metrics_with_values = {
-          'queues.retry_queue_size' => Sidekiq::Stats.new.retry_size,
-          'queues.dead_queue_size'  => Sidekiq::Stats.new.dead_size,
+          'queues.retry_size' => Sidekiq::Stats.new.retry_size,
+          'queues.dead_size'  => Sidekiq::Stats.new.dead_size,
         }
 
         metrics_with_values.each do |metric, value|
           opentsdb_client.put metric: "nine.sidekiq.#{metric}", value: value,
-                              timestamp: Time.now.to_i, tags: { app: application_name }
+                              timestamp: Time.now.to_i, tags: construct_tags
         end
       end
 
       private
 
-      def application_name
-        return 'unknown' unless defined?(Rails)
+      def construct_tags
+        tags = {}
 
-        Rails.application.class.parent_name
+        tags[:app] = Rails.application.class.parent_name if defined?(Rails)
+
+        tags
       end
 
       def opentsdb_client

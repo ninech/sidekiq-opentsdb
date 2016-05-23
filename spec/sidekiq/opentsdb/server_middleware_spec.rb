@@ -37,11 +37,11 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
 
       it 'sets the correct metric name' do
         expect(opentsdb_client).to receive(:put).once.with(
-          hash_including(metric: 'nine.sidekiq.queues.retry_queue_size')
+          hash_including(metric: 'nine.sidekiq.queues.retry_size')
         )
 
         expect(opentsdb_client).to receive(:put).once.with(
-          hash_including(metric: 'nine.sidekiq.queues.dead_queue_size')
+          hash_including(metric: 'nine.sidekiq.queues.dead_size')
         )
 
         subject
@@ -49,11 +49,11 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
 
       it 'sends the correct value for each metric' do
         expect(opentsdb_client).to receive(:put).once.with(
-          hash_including(metric: /retry_queue_size/, value: 10)
+          hash_including(metric: /retry_size/, value: 10)
         )
 
         expect(opentsdb_client).to receive(:put).once.with(
-          hash_including(metric: /dead_queue_size/, value: 20)
+          hash_including(metric: /dead_size/, value: 20)
         )
 
         subject
@@ -84,9 +84,9 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
         end
 
         context 'non-Rails app' do
-          it 'sets the application name to unknown' do
+          it 'does not set the application name' do
             expect(opentsdb_client).to receive(:put).twice.with(
-              hash_including(tags: { app: 'unknown' })
+              hash_including(tags: {})
             )
 
             subject
