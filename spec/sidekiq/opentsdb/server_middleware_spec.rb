@@ -85,31 +85,46 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
       end
 
       describe 'tags' do
-        context 'Rails app' do
-          before(:each) do
-            FAKE_RAILS = stub_const('Rails', double)
+        describe 'host' do
+          before(:each) { allow(Socket).to receive(:gethostname).and_return('MyHost') }
 
-            fake_rails_app = double(class: double(parent_name: 'MyApp'))
-            allow(FAKE_RAILS).to receive(:application).and_return(fake_rails_app)
-          end
-
-          it 'sets the application name' do
+          it 'sets the host' do
             expect(opentsdb_client).to receive(:put).twice.with(
-              hash_including(tags: { app: 'MyApp' })
+              hash_including(tags: hash_including(host: 'MyHost'))
             )
 
             subject
           end
         end
 
-        context 'non-Rails app' do
-          it 'does not set the application name' do
-            expect(opentsdb_client).to receive(:put).twice.with(
-              hash_including(tags: {})
-            )
+        describe 'app' do
+          context 'Rails app' do
+            before(:each) do
+              FAKE_RAILS = stub_const('Rails', double)
 
-            subject
+              fake_rails_app = double(class: double(parent_name: 'MyApp'))
+              allow(FAKE_RAILS).to receive(:application).and_return(fake_rails_app)
+            end
+
+            it 'sets the application name' do
+              expect(opentsdb_client).to receive(:put).twice.with(
+                hash_including(tags: hash_including(app: 'MyApp'))
+              )
+
+              subject
+            end
           end
+
+          context 'non-Rails app' do
+            it 'does not set the application name' do
+              expect(opentsdb_client).to receive(:put).twice.with(
+                hash_including(tags: hash_excluding(app: 'MyApp'))
+              )
+
+              subject
+            end
+          end
+
         end
       end
     end

@@ -30,7 +30,8 @@ module Sidekiq
       def construct_tags
         tags = {}
 
-        tags[:app] = Rails.application.class.parent_name if defined?(Rails)
+        tags[:host] = Socket.gethostname
+        tags[:app]  = Rails.application.class.parent_name if defined?(Rails)
 
         tags
       end
