@@ -37,11 +37,11 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
 
       it 'sets the correct metric name' do
         expect(opentsdb_client).to receive(:put).once.with(
-          hash_including(metric: 'nine.sidekiq.queues.retry_size')
+          hash_including(metric: 'sidekiq.queues.retry_size')
         )
 
         expect(opentsdb_client).to receive(:put).once.with(
-          hash_including(metric: 'nine.sidekiq.queues.dead_size')
+          hash_including(metric: 'sidekiq.queues.dead_size')
         )
 
         subject
@@ -63,6 +63,25 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
         expect(opentsdb_client).to receive(:put).twice.with(hash_including(timestamp: Fixnum))
 
         subject
+      end
+
+      describe 'metric prefix' do
+        subject do
+          described_class.new(opentsdb_hostname: '', opentsdb_port: '', metric_prefix: 'nine').
+            call(worker, msg, queue, &clean_job)
+        end
+
+        it 'sets the correct prefixed metric name' do
+          expect(opentsdb_client).to receive(:put).once.with(
+            hash_including(metric: 'nine.sidekiq.queues.retry_size')
+          )
+
+          expect(opentsdb_client).to receive(:put).once.with(
+            hash_including(metric: 'nine.sidekiq.queues.dead_size')
+          )
+
+          subject
+        end
       end
 
       describe 'tags' do
