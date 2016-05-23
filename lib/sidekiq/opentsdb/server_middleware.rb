@@ -6,6 +6,7 @@ module Sidekiq
           fail '[sidekiq-opentsdb] OpenTSDB configuration not found...'
         end
 
+        @metric_prefix     = options.key?(:metric_prefix) ? "#{options[:metric_prefix]}." : ''
         @opentsdb_hostname = options[:opentsdb_hostname]
         @opentsdb_port     = options[:opentsdb_port]
       end
@@ -19,7 +20,7 @@ module Sidekiq
         }
 
         metrics_with_values.each do |metric, value|
-          opentsdb_client.put metric: "nine.sidekiq.#{metric}", value: value,
+          opentsdb_client.put metric: "#{@metric_prefix}sidekiq.#{metric}", value: value,
                               timestamp: Time.now.to_i, tags: construct_tags
         end
       end
