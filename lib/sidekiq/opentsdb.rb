@@ -6,4 +6,5 @@ module Sidekiq
   end
 end
 
+require 'sidekiq/opentsdb/server_middleware'
 require 'sidekiq/opentsdb/version'
