@@ -1,5 +1,6 @@
 require 'sidekiq/api'
 require 'opentsdb'
+require 'socket'
 
 module Sidekiq
   module Opentsdb
