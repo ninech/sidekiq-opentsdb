@@ -6,6 +6,11 @@ module Sidekiq
           fail '[sidekiq-opentsdb] OpenTSDB configuration not found...'
         end
 
+        @sidekiq_metrics = %w(processed failed scheduled_size retry_size dead_size
+                              processes_size default_queue_latency workers_size enqueue)
+
+        filter_metrics!(options)
+
         @metric_prefix     = options.key?(:metric_prefix) ? "#{options[:metric_prefix]}." : ''
         @opentsdb_hostname = options[:opentsdb_hostname]
         @opentsdb_port     = options[:opentsdb_port]
@@ -14,18 +19,31 @@ module Sidekiq
       def call(*)
         yield
 
-        metrics_with_values = {
-          'queues.retry_size' => Sidekiq::Stats.new.retry_size,
-          'queues.dead_size'  => Sidekiq::Stats.new.dead_size,
-        }
-
-        metrics_with_values.each do |metric, value|
+        sidekiq_stats_metrics_with_values.each do |metric, value|
           opentsdb_client.put metric: "#{@metric_prefix}sidekiq.#{metric}", value: value,
                               timestamp: Time.now.to_i, tags: construct_tags
         end
       end
 
       private
+
+      def filter_metrics!(options)
+        if options.key?(:only)
+          @sidekiq_metrics.select! { |key, _| options[:only].include?(key) }
+        elsif options.key?(:except)
+          @sidekiq_metrics.select! { |key, _| !options[:except].include?(key) }
+        end
+
+        @sidekiq_metrics
+      end
+
+      def sidekiq_stats_metrics_with_values
+        sidekiq_stats_instance = Sidekiq::Stats.new
+
+        @sidekiq_metrics.inject({}) do |hash, sidekiq_metric|
+          hash.merge("stats.#{sidekiq_metric}" => sidekiq_stats_instance.send(sidekiq_metric))
+        end
+      end
 
       def construct_tags
         tags = {}
