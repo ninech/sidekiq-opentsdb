@@ -7,7 +7,7 @@ module Sidekiq
         end
 
         @sidekiq_metrics = %w(processed failed scheduled_size retry_size dead_size
-                              processes_size default_queue_latency workers_size enqueue)
+                              processes_size default_queue_latency workers_size enqueued)
 
         filter_metrics!(options)
 
@@ -49,7 +49,7 @@ module Sidekiq
         tags = {}
 
         tags[:host] = Socket.gethostname
-        tags[:app]  = Rails.application.class.parent_name if defined?(Rails)
+        tags[:app]  = ::Rails.application.class.parent_name if defined?(Rails)
 
         tags
       end

@@ -10,7 +10,7 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
     {
       processed: 1, failed: 2, scheduled_size: 3, retry_size: 10,
       dead_size: 20, processes_size: 1, default_queue_latency: 50,
-      workers_size: 5, enqueue: 1
+      workers_size: 5, enqueued: 1
     }
   end
 
@@ -150,7 +150,6 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
               subject
             end
           end
-
         end
       end
     end
