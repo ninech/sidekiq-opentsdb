@@ -1,5 +1,5 @@
 module Sidekiq
   module Opentsdb
-    VERSION = '0.1.0'
+    VERSION = File.read(File.expand_path('../../../../VERSION', __FILE__).strip).chomp
   end
 end
