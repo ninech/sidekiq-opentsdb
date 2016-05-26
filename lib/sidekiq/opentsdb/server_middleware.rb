@@ -47,7 +47,11 @@ module Sidekiq
         tags = {}
 
         tags[:host] = Socket.gethostname
-        tags[:app]  = ::Rails.application.class.parent_name if defined?(Rails)
+
+        if defined?(Rails)
+          tags[:app]       = ::Rails.application.class.parent_name
+          tags[:rails_env] = ::Rails.env
+        end
 
         tags
       end

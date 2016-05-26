@@ -172,6 +172,14 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
 
               subject
             end
+
+            it 'sets the Rails environment' do
+              expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.with(
+                hash_including(tags: hash_including(rails_env: 'MyEnvironment'))
+              )
+
+              subject
+            end
           end
 
           context 'non-Rails app' do
