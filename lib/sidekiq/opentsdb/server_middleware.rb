@@ -29,12 +29,10 @@ module Sidekiq
 
       def filter_metrics!(options)
         if options.key?(:only)
-          @sidekiq_metrics.select! { |key, _| options[:only].include?(key) }
+          @sidekiq_metrics.select! { |key| options[:only].include?(key) }
         elsif options.key?(:except)
-          @sidekiq_metrics.select! { |key, _| !options[:except].include?(key) }
+          @sidekiq_metrics.select! { |key| !options[:except].include?(key) }
         end
-
-        @sidekiq_metrics
       end
 
       def sidekiq_stats_metrics_with_values

@@ -26,13 +26,25 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
 
   subject { described_class.new(opentsdb_hostname: '', opentsdb_port: '').call(worker, msg, queue, &clean_job) }
 
+  describe '#initialize' do
+    it 'raises an error if the opentsdb parameters are missing' do
+      expect do
+        described_class.new(opentsdb_hostname: '')
+      end.to raise_error('[sidekiq-opentsdb] OpenTSDB configuration not found...')
+
+      expect do
+        described_class.new(opentsdb_port: '')
+      end.to raise_error('[sidekiq-opentsdb] OpenTSDB configuration not found...')
+    end
+  end
+
   describe '#call' do
-    context 'invalid configuration' do
-      it 'raises an error if the opentsdb parameters are missing' do
-        expect do
-          described_class.new(opentsdb_hostname: '')
-        end.to raise_error('[sidekiq-opentsdb] OpenTSDB configuration not found...')
-      end
+    it 'launches the job passed in' do
+      allow(opentsdb_client).to receive(:put)
+
+      expect do |b|
+        described_class.new(opentsdb_hostname: '', opentsdb_port: '').call(worker, msg, queue, &b)
+      end.to yield_with_no_args
     end
 
     describe 'metrics filtering' do
@@ -61,6 +73,14 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
     end
 
     describe 'OpenTSDB call' do
+      it 'connects to the client with correct credentials' do
+        expect(::OpenTSDB::Client).to receive(:new).with(hostname: 'host.test', port: '1234')
+        expect(opentsdb_client).to receive(:put)
+
+        described_class.new(opentsdb_hostname: 'host.test', opentsdb_port: '1234', only: ['processed']).
+          call(worker, msg, queue, &clean_job)
+      end
+
       it 'sends nine metrics' do
         expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times
 
@@ -101,6 +121,14 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
             call(worker, msg, queue, &clean_job)
         end
 
+        it 'defaults to the blank metric prefix if none are provided' do
+          expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.with(
+            hash_including(metric: /sidekiq\./)
+          )
+
+          subject
+        end
+
         it 'sets the correct prefixed metric name' do
           expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.with(
             hash_including(metric: /nine\.sidekiq\./)
@@ -126,10 +154,15 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
         describe 'app' do
           context 'Rails app' do
             before(:each) do
-              FAKE_RAILS = stub_const('Rails', double)
+              TOP_RAILS    =    stub_const('Rails', double)
+              NESTED_RAILS = stub_const('Sidekiq::Opentsdb::ServerMiddleware::Rails', double)
 
               fake_rails_app = double(class: double(parent_name: 'MyApp'))
-              allow(FAKE_RAILS).to receive(:application).and_return(fake_rails_app)
+              allow(TOP_RAILS).to receive(:application).and_return(fake_rails_app)
+              allow(TOP_RAILS).to receive(:env).and_return('MyEnvironment')
+
+              expect(NESTED_RAILS).to_not receive(:application)
+              expect(NESTED_RAILS).to_not receive(:env)
             end
 
             it 'sets the application name' do
