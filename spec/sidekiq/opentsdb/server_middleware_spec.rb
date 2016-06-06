@@ -47,6 +47,14 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
       end.to yield_with_no_args
     end
 
+    describe 'error handling' do
+      it 'does not stop the job if there has been a problem when connecting to OpenTSDB' do
+        expect(opentsdb_client).to receive(:put).and_raise(::OpenTSDB::Errors::UnableToConnectError)
+
+        expect { subject }.to_not raise_error
+      end
+    end
+
     describe 'metrics filtering' do
       let(:metrics_subset) { %w(processed failed scheduled_size retry_size) }
 

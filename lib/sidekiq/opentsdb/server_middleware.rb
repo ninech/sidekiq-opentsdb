@@ -23,6 +23,7 @@ module Sidekiq
           opentsdb_client.put metric: "#{@metric_prefix}sidekiq.#{metric}", value: value,
                               timestamp: Time.now.to_i, tags: construct_tags
         end
+      rescue ::OpenTSDB::Errors::UnableToConnectError
       end
 
       private
