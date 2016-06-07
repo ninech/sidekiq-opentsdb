@@ -1,5 +1,7 @@
 # Sidekiq::Opentsdb
 
+[![Build Status](https://travis-ci.org/ninech/sidekiq-opentsdb.svg?branch=master)](https://travis-ci.org/ninech/sidekiq-opentsdb)
+
 Sidekiq middleware that sends useful Sidekiq statistics to OpenTSDB.
 
 ## Installation
