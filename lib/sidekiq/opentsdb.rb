@@ -7,5 +7,6 @@ module Sidekiq
   end
 end
 
+require 'sidekiq/opentsdb/tags'
 require 'sidekiq/opentsdb/server_middleware'
 require 'sidekiq/opentsdb/version'
