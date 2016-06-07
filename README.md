@@ -47,3 +47,11 @@ except: %w(retry_size dead_size) # (optional) Send all but the given metrics to 
 app: 'MyApp'                     # (optional) Your app name (Rails app name if available)
 environment: 'staging'           # (optional) Your app environment (default: ENV['RACK_ENV'])
 ```
+
+## About
+
+This Gem is maintained and funded by nine.ch.
+
+![nine.ch](https://blog.nine.ch/assets/logo.png)
+
+We run your Linux server infrastructure – without interruptions, around the clock.

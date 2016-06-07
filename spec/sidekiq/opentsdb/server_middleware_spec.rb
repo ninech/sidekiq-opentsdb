@@ -89,9 +89,8 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
           call(worker, msg, queue, &clean_job)
       end
 
-      it 'sends nine metrics' do
+      it 'sends all metrics' do
         expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times
-
         subject
       end
 
