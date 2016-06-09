@@ -1,15 +1,20 @@
 language: ruby
-
 rvm:
-  - 2.3.1
-  - 2.2.4
-  - 2.1.8
-
+- 2.3.0
+- 2.2
+- 2.1
 sudo: false
-
 cache: bundler
-
-script: "bundle exec rspec"
-
+script: bundle exec rspec
 notifications:
   email: false
+deploy:
+  provider: rubygems
+  api_key:
+    secure: GRvMGszfopDomvWOWaSVsEpE3ZI8QHykuM8U7RTFQ1/wAwGe5P33sGGw3eciSGYHRB+UgQyxFdJUPz5kp+rYojSD7XvvRwMfNkY3o4LlJpkb5Yi8vf7Htg6tgLflWLXVwM1ekkGXbDFDEZnjsBcgsS/ZPIkXBivbRcTGnd9WESxVK9tvly/htkMmGefYTWISOoSC4NLBuZVD4esFY+G19HdX48Gg8VneIqA0NdMoRgVTltD53fWFtRxzdF+Z1unynvNrQ3ZaI1BgW3It6V+S+Uuwz4tpXQ20fheYoLxA8XG3ER6ay3NxriSgTufFWTeEZWMqoKIBk3HoXTaYEb9Oici0R/IWNQdXMeoz0nPZDlPLWUdPz+MwFJAG0hmIQV9JCalP9rXoe1sOdcGn9o+tfl+E9jXiED8DtWl0++xn79ZpsdIvehzuOSwZWuPBDxMTmQNJX2yGKRgaXGsDqu8Q4d2osvF9wPt+1yKs5eyRWos6alGF+LlLOQ4Gy63nQaS4bBxXQoH1m40Fvgh7N6GNmhi/AckP88Vqfw2gqxSHtrSCPzfhnbXsc0dyqO8SoAKe103q/EyE58W91EmHdhgUNoD9tpZJRxrzFhvo3Oo/C2Q63GtOCRzbig9bzrNrks5ZAIXne45RQ8EOLxnB2jXt/hwAjGLSia9ydGtw3FdXSfk=
+  gem: sidekiq-opentsdb
+  on:
+    branch: master
+    tags: true
+    repo: ninech/sidekiq-opentsdb
+    rvm: 2.3.0
