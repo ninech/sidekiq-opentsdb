@@ -89,9 +89,8 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
           call(worker, msg, queue, &clean_job)
       end
 
-      it 'sends nine metrics' do
+      it 'sends all metrics' do
         expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times
-
         subject
       end
 
@@ -147,58 +146,14 @@ RSpec.describe Sidekiq::Opentsdb::ServerMiddleware do
       end
 
       describe 'tags' do
-        describe 'host' do
-          before(:each) { allow(Socket).to receive(:gethostname).and_return('MyHost') }
-
-          it 'sets the host' do
-            expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.with(
-              hash_including(tags: hash_including(host: 'MyHost'))
-            )
-
-            subject
-          end
+        before do
+          allow(Sidekiq::Opentsdb::Tags).to receive(:new).and_return(app: 'MyApp')
         end
 
-        describe 'app' do
-          context 'Rails app' do
-            before(:each) do
-              TOP_RAILS    =    stub_const('Rails', double)
-              NESTED_RAILS = stub_const('Sidekiq::Opentsdb::ServerMiddleware::Rails', double)
-
-              fake_rails_app = double(class: double(parent_name: 'MyApp'))
-              allow(TOP_RAILS).to receive(:application).and_return(fake_rails_app)
-              allow(TOP_RAILS).to receive(:env).and_return('MyEnvironment')
-
-              expect(NESTED_RAILS).to_not receive(:application)
-              expect(NESTED_RAILS).to_not receive(:env)
-            end
-
-            it 'sets the application name' do
-              expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.with(
-                hash_including(tags: hash_including(app: 'MyApp'))
-              )
-
-              subject
-            end
-
-            it 'sets the Rails environment' do
-              expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.with(
-                hash_including(tags: hash_including(rails_env: 'MyEnvironment'))
-              )
-
-              subject
-            end
-          end
-
-          context 'non-Rails app' do
-            it 'does not set the application name' do
-              expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.with(
-                hash_including(tags: hash_excluding(app: 'MyApp'))
-              )
-
-              subject
-            end
-          end
+        it 'passes the tags as hash' do
+          expect(opentsdb_client).to receive(:put).exactly(sidekiq_stats.size).times.
+            with hash_including(tags: hash_including(app: 'MyApp'))
+          subject
         end
       end
     end
